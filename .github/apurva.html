@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missing Letter Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .hidden-letter {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            margin: 0 5px;
+            border: 1px solid #000;
+            font-size: 20px;
+        }
+        .message {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .button-container {
+            margin-top: 20px;
+        }
+        input {
+            padding: 5px;
+            font-size: 16px;
+            width: 50px;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .attempts-left {
+            margin-top: 20px;
+        }
+        .invalid-feedback {
+            color: red;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Welcome to the Missing Letter Game!</h1>
+<p>Guess the word:</p>
+<div id="word-container"></div>
+
+<div class="button-container">
+    <input type="text" id="guess" maxlength="1" placeholder="Enter a letter" autofocus>
+    <button onclick="makeGuess()">Guess</button>
+</div>
+
+<p id="message" class="message"></p>
+<p class="attempts-left">Attempts left: <span id="attempts-left">5</span></p>
+<p id="invalid-feedback" class="invalid-feedback"></p>
+
+<script>
+    const words = ["apple", "banana", "grape", "orange", "peach"];  // List of words
+    let word = words[Math.floor(Math.random() * words.length)];  // Random word from list
+    let revealedWord = word.split('').map(letter => '');  // Hidden letters initialized to ""
+    let attempts = 5;  // Number of attempts
+    let guessedLetters = [];  // Array to keep track of guessed letters
+
+    // Function to display the current state of the word
+    function updateWordDisplay() {
+        const wordContainer = document.getElementById('word-container');
+        wordContainer.innerHTML = '';  // Clear previous display
+        revealedWord.forEach(letter => {
+            const letterDiv = document.createElement('div');
+            letterDiv.className = 'hidden-letter';
+            letterDiv.textContent = letter;
+            wordContainer.appendChild(letterDiv);
+        });
+    }
+
+    // Function to handle the user's guess
+    function makeGuess() {
+        const guess = document.getElementById('guess').value.toLowerCase();  // Get the guessed letter
+        const invalidFeedback = document.getElementById('invalid-feedback');
+        
+        // Clear previous invalid feedback
+        invalidFeedback.textContent = '';
+
+        // Check for valid input
+        if (guess.length !== 1 || !/[a-z]/.test(guess)) {
+            invalidFeedback.textContent = "Please enter a valid letter (a-z).";
+            return;
+        }
+
+        // Check for repeated guess
+        if (guessedLetters.includes(guess)) {
+            invalidFeedback.textContent = "You've already guessed this letter!";
+            return;
+        }
+
+        // Add guess to the list of guessed letters
+        guessedLetters.push(guess);
+
+        let correctGuess = false;
+        for (let i = 0; i < word.length; i++) {
+            if (word[i] === guess && revealedWord[i] === '_') {
+                revealedWord[i] = guess;  // Reveal the guessed letter
+                correctGuess = true;
+            }
+        }
+
+        if (!correctGuess) {
+            attempts--;  // Reduce attempts if the guess was wrong
+        }
+
+        updateWordDisplay();  // Update the word display
+        document.getElementById('guess').value = '';  // Clear the input field
+        document.getElementById('guess').focus();  // Focus back to the input field
+        document.getElementById('attempts-left').textContent = attempts;  // Update attempts left
+
+        // Check if the player has guessed the word or is out of attempts
+        if (revealedWord.join('') === word) {
+            document.getElementById('message').textContent = "Congratulations! You've guessed the word!";
+        } else if (attempts === 0) {
+            document.getElementById('message').textContent = "Game over! The word was: " + word;
+        } else {
+            document.getElementById('message').textContent = "";
+        }
+    }
+
+    // Initialize the game
+    updateWordDisplay();
+</script>
+
+</body>
+</html>
